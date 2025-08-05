@@ -21,7 +21,14 @@ CORS(app)
 register_routes(app)
 
 # Configure database
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
+# Use /tmp on Render for writable database location
+if os.environ.get('RENDER'):
+    db_path = '/tmp/app.db'
+else:
+    db_path = os.path.join(os.path.dirname(__file__), 'database', 'app.db')
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize database
