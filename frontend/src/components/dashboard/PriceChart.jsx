@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Calendar, ChevronDown } from 'lucide-react';
+import { Calendar, ChevronDown, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CHART_PERIODS, MOCK_PRICE_DATA } from '@/lib/constants';
+import { CHART_PERIODS } from '@/lib/constants';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { usePriceData } from '@/hooks/useApi';
 
 // Custom tooltip component
 const CustomTooltip = ({ active, payload, label }) => {
@@ -37,12 +38,28 @@ const CustomTooltip = ({ active, payload, label }) => {
 const PriceChart = ({ symbol = 'SPY' }) => {
   const [period, setPeriod] = useState('1m');
   const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
+  const [priceData, setPriceData] = useState([]);
   
-  // Format data for chart
-  const chartData = MOCK_PRICE_DATA.map(item => ({
-    ...item,
-    date: new Date(item.date),
-  }));
+  const { loading, error, getPriceData } = usePriceData();
+  
+  useEffect(() => {
+    const fetchPriceData = async () => {
+      try {
+        const result = await getPriceData(symbol, { timespan: 'day' });
+        if (result.success && result.data?.price_data) {
+          const formattedData = result.data.price_data.map(item => ({
+            ...item,
+            date: new Date(item.date),
+          }));
+          setPriceData(formattedData);
+        }
+      } catch (err) {
+        console.error('Failed to fetch price data:', err);
+      }
+    };
+    
+    fetchPriceData();
+  }, [symbol, getPriceData]);
   
   return (
     <Card className="col-span-2">
@@ -82,12 +99,21 @@ const PriceChart = ({ symbol = 'SPY' }) => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={chartData}
-              margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-            >
+        {loading ? (
+          <div className="flex h-[300px] items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="flex h-[300px] items-center justify-center text-destructive">
+            <p>Failed to load price data</p>
+          </div>
+        ) : (
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={priceData}
+                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+              >
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis 
                 dataKey="date" 
@@ -112,9 +138,10 @@ const PriceChart = ({ symbol = 'SPY' }) => {
                 activeDot={{ r: 6 }}
                 name="Close Price"
               />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+                          </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
