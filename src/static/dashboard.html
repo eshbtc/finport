@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Data Portal - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+        .navbar {
+            background-color: #1e293b;
+        }
+        .sidebar {
+            background-color: #1e293b;
+            min-height: calc(100vh - 56px);
+            padding-top: 20px;
+        }
+        .sidebar .nav-link {
+            color: #e2e8f0;
+            padding: 10px 20px;
+            margin-bottom: 5px;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #2d3748;
+        }
+        .sidebar .nav-link.active {
+            background-color: #3b82f6;
+        }
+        .card {
+            background-color: #1e293b;
+            border: none;
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        .chart-container {
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        .market-data {
+            font-size: 0.9rem;
+        }
+        .market-data .up {
+            color: #10b981;
+        }
+        .market-data .down {
+            color: #ef4444;
+        }
+        .watchlist-item {
+            padding: 10px;
+            border-bottom: 1px solid #2d3748;
+        }
+        .watchlist-item:hover {
+            background-color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Financial Data Portal</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">API Test</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <form class="d-flex">
+                            <input class="form-control me-2" type="search" placeholder="Search ticker..." id="search-input">
+                            <button class="btn btn-primary" type="button" onclick="searchTicker()">Search</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="fas fa-chart-line me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-search me-2"></i> Security Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-chart-bar me-2"></i> Technical Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-exclamation-triangle me-2"></i> FTD Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-sync-alt me-2"></i> Swap Theory
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-chart-area me-2"></i> ETF Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-cog me-2"></i> Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 py-4">
+                <h2 class="mb-4">Market Overview</h2>
+                
+                <!-- Market Indices -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card p-3">
+                            <h5>S&P 500</h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h3" id="sp500-price">-</span>
+                                <span class="market-data up" id="sp500-change">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3">
+                            <h5>Nasdaq</h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h3" id="nasdaq-price">-</span>
+                                <span class="market-data up" id="nasdaq-change">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3">
+                            <h5>Dow Jones</h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h3" id="dow-price">-</span>
+                                <span class="market-data down" id="dow-change">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-3">
+                            <h5>Russell 2000</h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h3" id="russell-price">-</span>
+                                <span class="market-data up" id="russell-change">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts and Data -->
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-8">
+                        <!-- Main Chart -->
+                        <div class="card p-3 mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 id="main-chart-title">GME Price Chart</h4>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-light me-2" onclick="changeTimeframe('1d')">1D</button>
+                                    <button class="btn btn-sm btn-outline-light me-2" onclick="changeTimeframe('1w')">1W</button>
+                                    <button class="btn btn-sm btn-outline-light me-2" onclick="changeTimeframe('1m')">1M</button>
+                                    <button class="btn btn-sm btn-outline-light" onclick="changeTimeframe('1y')">1Y</button>
+                                </div>
+                            </div>
+                            <div class="chart-container" id="main-chart">
+                                <p class="text-center py-5">Loading chart data...</p>
+                            </div>
+                        </div>
+
+                        <!-- Technical Indicators -->
+                        <div class="card p-3">
+                            <h4 class="mb-3">Technical Indicators</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="chart-container" id="indicator-chart-1">
+                                        <p class="text-center py-5">Loading RSI data...</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="chart-container" id="indicator-chart-2">
+                                        <p class="text-center py-5">Loading MACD data...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-md-4">
+                        <!-- Security Info -->
+                        <div class="card p-3 mb-4">
+                            <h4 class="mb-3">Security Info</h4>
+                            <div id="security-info">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Symbol:</span>
+                                    <span id="security-symbol">GME</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Name:</span>
+                                    <span id="security-name">GameStop Corp.</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Price:</span>
+                                    <span id="security-price">$25.30</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Change:</span>
+                                    <span class="up" id="security-change">+1.25 (5.2%)</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Volume:</span>
+                                    <span id="security-volume">2.5M</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Market Cap:</span>
+                                    <span id="security-market-cap">$7.8B</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>52W High:</span>
+                                    <span id="security-52w-high">$35.45</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>52W Low:</span>
+                                    <span id="security-52w-low">$15.20</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary mt-3" onclick="addToWatchlist()">Add to Watchlist</button>
+                        </div>
+
+                        <!-- Watchlist -->
+                        <div class="card p-3">
+                            <h4 class="mb-3">Watchlist</h4>
+                            <div id="watchlist">
+                                <div class="watchlist-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>GME</strong>
+                                        <span class="ms-2">GameStop</span>
+                                    </div>
+                                    <span class="up">$25.30 (+5.2%)</span>
+                                </div>
+                                <div class="watchlist-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>AAPL</strong>
+                                        <span class="ms-2">Apple Inc.</span>
+                                    </div>
+                                    <span class="up">$175.45 (+0.8%)</span>
+                                </div>
+                                <div class="watchlist-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>TSLA</strong>
+                                        <span class="ms-2">Tesla Inc.</span>
+                                    </div>
+                                    <span class="down">$245.30 (-1.2%)</span>
+                                </div>
+                                <div class="watchlist-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>SPY</strong>
+                                        <span class="ms-2">SPDR S&P 500 ETF</span>
+                                    </div>
+                                    <span class="up">$450.75 (+0.5%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // API Base URL
+        const API_BASE_URL = '/api';
+
+        // Current ticker and timeframe
+        let currentTicker = 'GME';
+        let currentTimeframe = '1m';
+
+        // Function to search for a ticker
+        function searchTicker() {
+            const ticker = document.getElementById('search-input').value.trim().toUpperCase();
+            if (ticker) {
+                currentTicker = ticker;
+                loadSecurityData(ticker);
+                loadPriceData(ticker, currentTimeframe);
+                loadTechnicalIndicators(ticker);
+            }
+        }
+
+        // Function to change timeframe
+        function changeTimeframe(timeframe) {
+            currentTimeframe = timeframe;
+            loadPriceData(currentTicker, timeframe);
+        }
+
+        // Function to add to watchlist
+        function addToWatchlist() {
+            alert(`Added ${currentTicker} to watchlist!`);
+            // In a real implementation, this would call the API to add the security to the user's watchlist
+        }
+
+        // Function to load security data
+        async function loadSecurityData(ticker) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/securities/${ticker}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const security = data.data;
+                    document.getElementById('security-symbol').textContent = security.symbol;
+                    document.getElementById('security-name').textContent = security.name;
+                    document.getElementById('main-chart-title').textContent = `${security.symbol} Price Chart`;
+                    
+                    // Other fields would be populated here in a real implementation
+                }
+            } catch (error) {
+                console.error('Error loading security data:', error);
+            }
+        }
+
+        // Function to load price data
+        async function loadPriceData(ticker, timeframe) {
+            try {
+                // Convert timeframe to API parameters
+                let fromDate, toDate;
+                const now = new Date();
+                
+                switch (timeframe) {
+                    case '1d':
+                        fromDate = new Date(now);
+                        fromDate.setDate(now.getDate() - 1);
+                        break;
+                    case '1w':
+                        fromDate = new Date(now);
+                        fromDate.setDate(now.getDate() - 7);
+                        break;
+                    case '1m':
+                        fromDate = new Date(now);
+                        fromDate.setMonth(now.getMonth() - 1);
+                        break;
+                    case '1y':
+                        fromDate = new Date(now);
+                        fromDate.setFullYear(now.getFullYear() - 1);
+                        break;
+                }
+                
+                fromDate = fromDate.toISOString().split('T')[0];
+                toDate = now.toISOString().split('T')[0];
+                
+                const response = await fetch(`${API_BASE_URL}/securities/${ticker}/price?from=${fromDate}&to=${toDate}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.price_data) {
+                    renderPriceChart(data.data.price_data);
+                }
+            } catch (error) {
+                console.error('Error loading price data:', error);
+            }
+        }
+
+        // Function to load technical indicators
+        async function loadTechnicalIndicators(ticker) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/securities/${ticker}/indicators`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.indicators) {
+                    renderRSIChart(data.data.indicators.rsi);
+                    renderMACDChart(data.data.indicators.macd, data.data.indicators.macd_signal);
+                }
+            } catch (error) {
+                console.error('Error loading technical indicators:', error);
+            }
+        }
+
+        // Function to render price chart
+        function renderPriceChart(priceData) {
+            const ctx = document.getElementById('main-chart');
+            
+            // Clear previous content
+            ctx.innerHTML = '';
+            
+            // Create canvas element
+            const canvas = document.createElement('canvas');
+            ctx.appendChild(canvas);
+            
+            // Prepare data
+            const labels = priceData.map(d => d.date);
+            const prices = priceData.map(d => d.close);
+            
+            // Create chart
+            new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${currentTicker} Price`,
+                        data: prices,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e2e8f0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Function to render RSI chart
+        function renderRSIChart(rsiData) {
+            const ctx = document.getElementById('indicator-chart-1');
+            
+            // Clear previous content
+            ctx.innerHTML = '';
+            
+            // Create canvas element
+            const canvas = document.createElement('canvas');
+            ctx.appendChild(canvas);
+            
+            // Prepare data
+            const dates = Object.keys(rsiData || {});
+            const values = Object.values(rsiData || {});
+            
+            // Create chart
+            new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'RSI',
+                        data: values,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e2e8f0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e2e8f0'
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Function to render MACD chart
+        function renderMACDChart(macdData, signalData) {
+            const ctx = document.getElementById('indicator-chart-2');
+            
+            // Clear previous content
+            ctx.innerHTML = '';
+            
+            // Create canvas element
+            const canvas = document.createElement('canvas');
+            ctx.appendChild(canvas);
+            
+            // Prepare data
+            const dates = Object.keys(macdData || {});
+            const macdValues = Object.values(macdData || {});
+            const signalValues = Object.values(signalData || {});
+            
+            // Create chart
+            new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: 'MACD',
+                            data: macdValues,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: false
+                        },
+                        {
+                            label: 'Signal',
+                            data: signalValues,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e2e8f0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load initial data
+            loadSecurityData(currentTicker);
+            loadPriceData(currentTicker, currentTimeframe);
+            loadTechnicalIndicators(currentTicker);
+        });
+    </script>
+</body>
+</html>
+
