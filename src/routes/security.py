@@ -8,8 +8,8 @@ import os
 
 security_bp = Blueprint('security', __name__, url_prefix='/api/securities')
 
-# Initialize services
-polygon_service = PolygonService(api_key=os.environ.get('POLYGON_API_KEY'))
+# Initialize services with default API key if not in environment
+polygon_service = PolygonService(api_key=os.environ.get('POLYGON_API_KEY', 'QqvHewfNYcDiPQUPVFblxK6SczJmcblY'))
 ftd_service = FTDService()
 analytics_service = AnalyticsService()
 

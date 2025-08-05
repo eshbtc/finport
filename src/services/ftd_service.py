@@ -16,9 +16,17 @@ class FTDService:
     def __init__(self):
         """Initialize the FTD service"""
         self.base_url = "https://www.sec.gov/data/foiadocsfailsdatahtm"
-        
-        # Register the API provider in the database
-        self._register_api_provider()
+        self._provider_registered = False
+    
+    def _ensure_registered(self):
+        """Ensure the API provider is registered before making API calls"""
+        if not self._provider_registered:
+            try:
+                self._register_api_provider()
+                self._provider_registered = True
+            except Exception as e:
+                # Log but don't fail - API calls can still work without registration
+                logger.warning(f"Could not register API provider: {str(e)}")
     
     def _register_api_provider(self):
         """Register SEC EDGAR as an API provider in the database"""
