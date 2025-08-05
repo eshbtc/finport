@@ -22,8 +22,11 @@ class FTDService:
         """Ensure the API provider is registered before making API calls"""
         if not self._provider_registered:
             try:
-                self._register_api_provider()
-                self._provider_registered = True
+                # Only register if we're in a Flask app context
+                from flask import current_app
+                if current_app:
+                    self._register_api_provider()
+                    self._provider_registered = True
             except Exception as e:
                 # Log but don't fail - API calls can still work without registration
                 logger.warning(f"Could not register API provider: {str(e)}")
