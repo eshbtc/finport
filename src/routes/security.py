@@ -8,10 +8,31 @@ import os
 
 security_bp = Blueprint('security', __name__, url_prefix='/api/securities')
 
-# Initialize services with default API key if not in environment
-polygon_service = PolygonService(api_key=os.environ.get('POLYGON_API_KEY', 'QqvHewfNYcDiPQUPVFblxK6SczJmcblY'))
-ftd_service = FTDService()
-analytics_service = AnalyticsService()
+# Services will be initialized lazily
+_polygon_service = None
+_ftd_service = None
+_analytics_service = None
+
+def get_polygon_service():
+    """Get or create polygon service instance"""
+    global _polygon_service
+    if _polygon_service is None:
+        _polygon_service = PolygonService(api_key=os.environ.get('POLYGON_API_KEY', 'QqvHewfNYcDiPQUPVFblxK6SczJmcblY'))
+    return _polygon_service
+
+def get_ftd_service():
+    """Get or create FTD service instance"""
+    global _ftd_service
+    if _ftd_service is None:
+        _ftd_service = FTDService()
+    return _ftd_service
+
+def get_analytics_service():
+    """Get or create analytics service instance"""
+    global _analytics_service
+    if _analytics_service is None:
+        _analytics_service = AnalyticsService()
+    return _analytics_service
 
 @security_bp.route('/', methods=['GET'])
 def get_securities():
@@ -47,6 +68,7 @@ def search_securities():
         
         # If not found in database, search via Polygon API
         if not securities:
+            polygon_service = get_polygon_service()
             securities = polygon_service.search_tickers(query)
         
         return jsonify({
@@ -68,6 +90,7 @@ def get_security(ticker):
         
         # If not found, fetch from Polygon API
         if not security:
+            polygon_service = get_polygon_service()
             security = polygon_service.get_ticker_details(ticker.upper())
             if not security:
                 return jsonify({
@@ -99,6 +122,7 @@ def get_security_price(ticker):
         
         # If not found, fetch from Polygon API
         if not security:
+            polygon_service = get_polygon_service()
             security = polygon_service.get_ticker_details(ticker.upper())
             if not security:
                 return jsonify({
@@ -111,6 +135,7 @@ def get_security_price(ticker):
         
         # If no price data or requesting specific date range, fetch from Polygon API
         if not price_data or from_date or to_date:
+            polygon_service = get_polygon_service()
             result = polygon_service.get_price_data(
                 ticker.upper(),
                 timespan=timespan,

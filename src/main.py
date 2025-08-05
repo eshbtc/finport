@@ -8,11 +8,12 @@ from flask_cors import CORS
 from src.models import init_app
 from src.routes import register_routes
 
-# Set up Polygon API key
-os.environ['POLYGON_API_KEY'] = 'QqvHewfNYcDiPQUPVFblxK6SczJmcblY'
+# Set up Polygon API key from environment variable
+if not os.environ.get('POLYGON_API_KEY'):
+    os.environ['POLYGON_API_KEY'] = 'QqvHewfNYcDiPQUPVFblxK6SczJmcblY'  # Fallback for development
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
-app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'asdf#FGSgvasgf$5$WGT')  # Use environment variable
 
 # Enable CORS
 CORS(app)
@@ -52,4 +53,5 @@ def serve(path):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)

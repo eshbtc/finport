@@ -185,8 +185,9 @@ class FTDService:
                         records_failed += 1
                         continue
                     
-                    # Save the zip file temporarily
-                    zip_path = f"/tmp/ftd_data_{year}_{half}.zip"
+                    # Save the zip file temporarily - use /tmp for Render.com compatibility
+                    import tempfile
+                    zip_path = os.path.join(tempfile.gettempdir(), f"ftd_data_{year}_{half}.zip")
                     with open(zip_path, 'wb') as f:
                         f.write(response.content)
                     
